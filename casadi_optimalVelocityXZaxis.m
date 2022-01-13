@@ -1,26 +1,7 @@
-%% 速度最適化
+% 速度最適化
 
-function [V, fval, exitflag, output,cout,ceqout] = optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Mass,fmax,VelC,nt,ts,MotorRatio,SLength)
-
-opti = casadi.Opti();
-
-V = opti.variable(nt);
-
-opti.subject_to(2*(2*R(i)*PosErrMax)^(1/2)/ts == 0);
-
-
-opti.minimize(  (y-x^2)^2   );
-opti.subject_to( x^2+y^2==1 );
-opti.subject_to(     x+y>=1 );
-
-opti.solver('ipopt');
-
-sol = opti.solve();
-
-sol.value(x)
-sol.value(y)
-
-
+function [V, fval, exitflag, output,cout,ceqout] = casadi_optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Mass,fmax,VelC,nt,ts,MotorRatio,SLength)
+%% 制約条件定義
 MatMin = zeros(nt, 3);
 for i = 1 :nt
     MatMin(i,1) = 2*(2*R(i)*PosErrMax)^(1/2) / ts;
@@ -36,8 +17,30 @@ for i = 1 :nt
     end
 end
 
-ffun = @f;
-gfun = @g;
+%% CasADiに最適化条件を入力
+import casadi.*
+opti = casadi.Opti();
+
+V = opti.variable(nt);
+
+for i = 1:nt-1
+    opti.subject_to( Mass*abs(DS_2(i,1)*(V(i)/SLength)^2 + DS(i,1)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i))) + (VelC *V(i)) <= fmax);
+    opti.subject_to( V <= MatMin(i,1) );
+end
+
+
+obj = sum(V)
+opti.minimize( obj );
+
+p_opts = struct('expand',true);
+s_opts = struct('max_iter',10000);
+opti.solver('ipopt',p_opts,s_opts);
+sol = opti.solve();
+
+sol.value(x)
+sol.value(y)
+
+%%
 x0 = ones(nt,1);
 x0 = x0.*Vmax;
 
@@ -47,7 +50,7 @@ for  i = 1:1
     x0(1,end-i+1) = 0;
     x0(2,end-i+1) = 0;
 end
-
+%%
 options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','MaxFunctionEvaluations',100000000000, 'MaxIterations',10000000000);
 % options = optimoptions('fmincon','Algorithm','interior-point','MaxFunctionEvaluations',100000000000);
 
