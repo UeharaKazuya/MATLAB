@@ -90,17 +90,17 @@ Q = [
 nQ = length(Q);     % Number of Control Points
 k = 3;              % Degree of B-Spline
 nKnot = nQ + k + 1; % Number of Knots in Knot Vector
-nSampling = 50;     % Number of Sampling / Control Points
+nSampling = 10;     % Number of Sampling / Control Points
 nt = nSampling * (nQ-1)+1;  % Number of Sampling
 ts = 1;        % Sampling time [s]
-Vmax = 1000;        % max Velocity [mm/min]
+Vmax = 100;        % max Velocity [mm/min]
 Amax = 150;          % max Accelaration [mm/s^2]
-PosErrMax = 0.5;    % max Position Error [mm]
+PosErrMax = 0.01;    % max Position Error [mm]
 MotorRatio = 1;     % Ratio of Motor
 
-Mass = 5;
-VelC = 5;
-Fmax = 10;
+Mass = 5.33;
+VelC = 24.2020;
+Fmax = 100;
 
 
 t = 0:nt-1;
@@ -157,8 +157,9 @@ DS_norm(1) = 1*10^(-10);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocity(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,nt,ts,MotorRatio,SLength);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocityCXY(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,nt,ts,MotorRatio,SLength);
-% [V, fval, exitflag,output, cout,ceqout] = optimalEnergy(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
-[V, fval, exitflag,output, cout,ceqout] = casadi_optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
+[V, fval, exitflag,output, cout,ceqout] = optimalEnergy(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
+% [V, fval, exitflag,output, cout,ceqout] = casadi_optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
+% [V, fval, exitflag,output, cout,ceqout] = casadi_optimalEnergy(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Mass,Fmax,VelC,nt,ts,MotorRatio,SLength);
 
 
 % min(cout)

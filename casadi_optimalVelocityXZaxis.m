@@ -18,6 +18,7 @@ for i = 1 :nt
 end
 
 %% CasADi‚ÉÅ“K‰»ğŒ‚ğ“ü—Í
+addpath('C:\Users\spica\OneDrive\‘åŠw\Œ¤‹†\matlab\matlab\casadi-windows-matlabR2016a-v3.5.5')
 import casadi.*
 opti = casadi.Opti();
 

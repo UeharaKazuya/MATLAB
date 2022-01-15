@@ -18,12 +18,13 @@ for i = 1 :nt
 end
 
 %%
-addpath('C:\Users\spica\OneDrive\‘åŠw\Œ¤‹†\matlab\matlab\casadi-windows-matlabR2016a-v3.5.5')
+addpath('D:\Users\spica\OneDrive\‘åŠw\Œ¤‹†\matlab\matlab\casadi-windows-matlabR2016a-v3.5.5')
 import casadi.*
 opti = casadi.Opti();
 
 V = opti.variable(nt);
-opti.set_initial(, 2);
+
+opti.set_initial(V, 2);
 
 for i = 1:nt-1
     opti.subject_to( V <= MatMin(i,1) );
@@ -39,6 +40,16 @@ opti.solver('ipopt',p_opts,s_opts);
 sol = opti.solve();
 
 %%
+
+x0 = x0.*Vmax;
+
+for  i = 1:1
+    x0(1,i) = 0;
+    x0(2,i) = 0;
+    x0(1,end-i+1) = 0;
+    x0(2,end-i+1) = 0;
+end
+
 ffun = @f;
 gfun = @g;
 x0 = ones(nt,1);
