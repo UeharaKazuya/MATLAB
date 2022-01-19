@@ -37,7 +37,7 @@ options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','
 
 %% Optimization conditions
     function [fun] = f(V)
-         fun =  sum( V.^2 * Mass*(DS_2(i,1)*(V(i)/SLength)^2 + DS(i,1)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i)) - VelC*V(i)));
+         fun =  sum(Mass*(DS_2(i,1)*(V(i)/SLength)^2 + DS(i,1)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i)) - VelC*V(i)));
 %          fun =  -sum(V.^2);
     end
 
@@ -47,7 +47,7 @@ options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','
 %             c(nt+i) =abs(DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1))) - Amax;
 %             c(i) = abs(DS_2(i,1)*(V(i)/SLength)^2 + DS(i,1)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i))) - (fmax - VelC*V(i))/Mass;
 %             c(nt+i) =abs(DS_2(i,2)*(V(i)/SLength)^2 + DS(i,2)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i))) - (fmax - VelC*V(i))/Mass;
-
+            c(nt+i)   = 16 - sum(V.^2); 
             c(2*nt+i) = V(i) - MatMin(i,1);
             c(3*nt+i) = -V(i);
         end

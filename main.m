@@ -99,13 +99,14 @@ PosErrMax = 0.01;    % max Position Error [mm]
 MotorRatio = 1;     % Ratio of Motor
 
 Mass = 5.33;
+Mass = 0;
 VelC = 24.2020;
 Fmax = 100;
 
 
 t = 0:nt-1;
 t = t / t(end);
-Vmax = Vmax /60   %[mm/min] to [mm/s]
+Vmax = Vmax /60;   %[mm/min] to [mm/s]
 
 u = OpenUniformKnotVector(nKnot,k,nQ);  %開一様ノットベクトル作成
 P = CalculateControlPoint(Q, u, k); % 制御点導出関数
@@ -122,7 +123,7 @@ end
 S(1,:) = Q(1,:);
 SLength = TotalLength(Q);
 
-
+figure;
 plot(S(:,1),S(:,2),P(:,1),P(:,2),'o',Q(:,1),Q(:,2),'o');
 
 %% 微分値を計算
@@ -166,8 +167,8 @@ DS_norm(1) = 1*10^(-10);
 
 %% 速度計算
 for i = 1: nt-1
-    V(i,2) = DS(i,1)*V(i)/SLength;
-    V(i,3) = DS(i,2)*V(i)/SLength;
+    V(i,2) = DS(i,1)*V(i)./DS_norm(i);
+    V(i,3) = DS(i,2)*V(i)./DS_norm(i);
     V(i,4) = norm(V(i,2:3));
 end
 
@@ -177,9 +178,9 @@ for i = 2: nt-1
 %     A(i, 1) = DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
 %     A(i, 2) = DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
     
-    Accele(i, 3) = (V(i+1)^2-V(i)^2) / 2*SLength*(t(i+1)-t(i));
-    Accele(i, 1) = DS_2(i,1)*(V(i)/SLength)^2 + DS(i,1)*Accele(i, 3)/SLength;
-    Accele(i, 2) = DS_2(i,2)*(V(i)/SLength)^2 + DS(i,2)*Accele(i, 3)/SLength;
+    Accele(i, 3) = (V(i+1)^2-V(i)^2) / 2*DS_norm(i)*(t(i+1)-t(i));
+    Accele(i, 1) = DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*Accele(i, 3)/DS_norm(i);
+    Accele(i, 2) = DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*Accele(i, 3)/DS_norm(i);
     
     Accele2(i, 1) = DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
     Accele2(i, 2) = DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
@@ -190,12 +191,25 @@ end
 %% Plot result
 % plot(t);
 
-% figure
+figure
 subplot(2,1,1);
 plot(t, V);
 xlabel('t');
 ylabel('V(m/s)');
 legend('norm(original)','X-axis','Y-axis','norm(calculated)');
+
+
+SRound = round(S,5).*(-1);
+Feed = V.*60;
+FeedRound = round(Feed,1);
+
+subplot(2,1,1);
+plot(t, Feed(:,2),'b-',t, Feed(:,3),'r--',t, Feed(:,1),'-.');
+xlabel('u');
+ylabel('V(mm/min)');
+legend('X-axis','Y-axis','Feed','norm(calculated)');
+set(gca, 'FontSize', 16);
+
 
 subplot(2,1,2); 
 plot(t, Accele(:,1),t, Accele(:,2),'--');
@@ -222,17 +236,6 @@ set(gca, 'FontSize', 16);
 % xlabel('t');
 % ylabel('d^2C/du^2');
 % legend('X','Y');
-
-SRound = round(S,5).*(-1);
-Feed = V.*60;
-FeedRound = round(Feed,1);
-
-subplot(2,1,1);
-plot(t, Feed(:,2),'b-',t, Feed(:,3),'r--',t, Feed(:,1),'-.');
-xlabel('u');
-ylabel('V(mm/min)');
-legend('X-axis','Y-axis','Feed','norm(calculated)');
-set(gca, 'FontSize', 16);
 
 % 
 % figure;
