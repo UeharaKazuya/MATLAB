@@ -90,7 +90,7 @@ Q = [
 nQ = length(Q);     % Number of Control Points
 k = 3;              % Degree of B-Spline
 nKnot = nQ + k + 1; % Number of Knots in Knot Vector
-nSampling = 50;     % Number of Sampling / Control Points
+nSampling = 10;     % Number of Sampling / Control Points
 nt = nSampling * (nQ-1)+1;  % Number of Sampling
 ts = 1;        % Sampling time [s]
 Vmax = 100;        % max Velocity [mm/min]
@@ -255,7 +255,7 @@ set(gca, 'FontSize', 16);
 
 T_data = t*15;
 dt = 0.01;
-tEnd = 3;
+tEnd = 2;
 
 Real.Vel = Calc_RealTime_Linear(T_data,dt,V(:,2),V(:,3));
 Real.Pos = Calc_RealTime_Linear(T_data,dt,S(:,1),S(:,2));
@@ -270,10 +270,8 @@ j = 2;
 realPosition = zeros(length(t),2);
 realVelocity = zeros(length(t),2);
 
-judgeAxis = 2;
-
 for i = 1:length(t)
-    if j > length(V(:,1)-1)
+    if j > length(V(:,1))
         realPosition(i,:) = NaN;
         realVelocity(i,:) = NaN;
         
@@ -281,36 +279,21 @@ for i = 1:length(t)
         if i == 1
             realPosition(1,:) = S(1,:);
             realVelocity(1,:) = V(1,2:3);
-        elseif V(j,3) < 0
-            realPosition(i,:) = realPosition(i-1,:) + V(j,2:3).*dt;
-            realVelocity(i,:) = V(j,2:3);
-            if realPosition(i,judgeAxis) < S(j,judgeAxis)
-                if j < length(V(:,1))
-                    j = j+1;
-                end
-                realPosition(i,:) = S(j,:);
-            end
 
-        elseif V(j,3) > 0
+        elseif i > 1
             realPosition(i,:) = realPosition(i-1,:) + V(j,2:3).*dt;
             realVelocity(i,:) = V(j,2:3);
-            if realPosition(i,judgeAxis) > S(j,judgeAxis)
-                if j < length(V(:,1))
-                    j = j+1;
-                end
-                realPosition(i,:) = S(j,:);
-            end
         end
         
+        if realPosition(i,2) > S(j,2)
+            j = j+1;
+            realPosition(i,:) = S(j,:);
 
+        end
     end
 end
 
-realPosition(:,1) = realPosition(:,1) - 5;
-inputPosition = [t',realPosition];
-inputVelocity = [t',realVelocity];
 
-save('inputdata','inputPosition','inputVelocity','t');
 
 %%
 figure;
@@ -331,14 +314,14 @@ set(gca, 'FontSize', 16);
 
 
 figure;
-subplot(3,1,1);
+subplot(2,1,1);
 plot(t,realVelocity(:,1),'b-',t,realVelocity(:,2),'r--');
 xlabel('t');
 ylabel('V(m/s)');
 legend('X-axis','Y-axis','Feed','norm(calculated)');
 set(gca, 'FontSize', 16);
 
-subplot(3,1,2); 
+subplot(2,1,2); 
 plot(t,realPosition(:,1),'b-',t,realPosition(:,2),'r--');
 xlabel('t');
 ylabel('Pos(m)');
@@ -346,10 +329,10 @@ legend('X-axis','Y-axis','Location','southeast');
 set(gca, 'FontSize', 16);
 
 subplot(3,1,3); 
-plot(realPosition(:,1),realPosition(:,2));
-% xlabel('t');
-% ylabel('Pos(m)');
-% legend('X-axis','Y-axis','Location','southeast');
+plot(realPosition(:,1),'b-',t,realPosition(:,2),'r--');
+xlabel('t');
+ylabel('Pos(m)');
+legend('X-axis','Y-axis','Location','southeast');
 set(gca, 'FontSize', 16);
 
 %%
