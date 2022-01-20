@@ -1,0 +1,11 @@
+function Real = makeInputData(T_data,dt,V(:,2),V(:,3),tLength)
+%makeInputData “ü—Í’l‚ğì¬
+%   
+
+for t = 0:dt:tLength
+    V
+    
+end
+
+end
+

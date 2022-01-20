@@ -250,6 +250,33 @@ set(gca, 'FontSize', 16);
 % 
 % NCCode = SRound;
 % NCCode(:,3) = FeedRound(:,1);
+%% インプットデータを作成
+T_data = t*5;
+dt = 0.01;
+
+Real.Vel = Calc_RealTime_Linear(T_data,dt,V(:,2),V(:,3));
+Real.Pos = Calc_RealTime_Linear(T_data,dt,S(:,1),S(:,2));
+Real.PosX = [Real.Pos(:,1),Real.Pos(:,2)];
+Real.PosY = [Real.Pos(:,1),Real.Pos(:,3)];
+% S_len = TotalLength(sol.value(S));
+% ActualTime = S_len/mean(feed);
+
+
+figure;
+subplot(2,1,1);
+plot(Real.Vel(:,1),Real.Vel(:,2),'b-',Real.Vel(:,1),Real.Vel(:,3),'r--');
+xlabel('t');
+ylabel('V(m/s)');
+legend('X-axis','Y-axis','Feed','norm(calculated)');
+set(gca, 'FontSize', 16);
+
+
+subplot(2,1,2); 
+plot(Real.Pos(:,1),Real.Pos(:,2),'b-',Real.Pos(:,1),Real.Pos(:,3),'r--');
+xlabel('t');
+ylabel('Pos(m)');
+legend('X-axis','Y-axis','Location','southeast');
+set(gca, 'FontSize', 16);
 
 %%
 clearvars b i Amax exitflag fval j k MatDet MotorRatio nKnot nQ nSampling nt output P PosErrMax SLength ts u Vmax
