@@ -1,0 +1,19 @@
+close all
+%%
+dt = 0.01;
+t = 0:dt:5-dt;
+simulateS = [S(:,1) - 5, S(:,2)];
+
+simulatePosition = zeros(length(realPosition(:,1),2);
+gapPosition
+for i=1:length(realPosition(:,1)-
+    simulatePosition(i,:) = realPosition(i+50,:);
+end
+    
+plot(simulateS(:,1),simulateS(:,2),sgn_076(:,1),sgn_076(:,2));
+figure;
+plot(t,sgn_076(:,1),t,sgn_076(:,2),inputPosition(:,1),simulatePosition(:,1),inputPosition(:,1),simulatePosition(:,2));
+figure;
+plot(t,sgn_076(:,3),t,sgn_076(:,4));
+figure;
+plot(t,sgn_076(:,5),t,sgn_076(:,6));

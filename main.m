@@ -255,7 +255,7 @@ set(gca, 'FontSize', 16);
 
 T_data = t*15;
 dt = 0.01;
-tEnd = 3;
+tEnd = 4;
 
 Real.Vel = Calc_RealTime_Linear(T_data,dt,V(:,2),V(:,3));
 Real.Pos = Calc_RealTime_Linear(T_data,dt,S(:,1),S(:,2));
@@ -307,6 +307,22 @@ for i = 1:length(t)
 end
 
 realPosition(:,1) = realPosition(:,1) - 5;
+for i = 1:97
+    realVelocity(i, 1:2) = [0, 0];
+end
+for i = 99:99
+    realVelocity(i, 1:2) = realVelocity(i+1, 1:2)./2;
+end
+% for i = 198:301
+%     realVelocity(i, 1:2) = [0, 0];
+% end
+for i = 1:97
+    realPosition(i, 1:2) = [0, 0];
+end
+for i = 298:length(t)
+    realPosition(i, 1:2) = [0, 0];
+end
+
 inputPosition = [t',realPosition];
 inputVelocity = [t',realVelocity];
 
@@ -353,9 +369,9 @@ plot(realPosition(:,1),realPosition(:,2));
 set(gca, 'FontSize', 16);
 
 %%
-clearvars b i Amax exitflag fval j k MatDet MotorRatio nKnot nQ nSampling nt output P PosErrMax SLength ts u Vmax
+clearvars b i Amax exitflag fval j k MatDet MotorRatio nKnot nQ nSampling nt output PosErrMax SLength ts u Vmax
 
-
+% close all
 return
  
 %%
