@@ -1,5 +1,6 @@
 %% main関数　速度最適化を行い，B-Spline曲線を表示する．
 clear
+close all
 
 %% desired Points (X-Y)
 % Q = [ 
@@ -84,68 +85,113 @@ Q = [
     5.0, 10.0;
     0.0, 5.0;
     5.0, 0.0;
+    10.0, 5.0;
+    5.0, 10.0;
+    0.0, 5.0;
+    5.0, 0.0;
+    10.0, 5.0;
+    5.0, 10.0;
+    0.0, 5.0;
+    5.0, 0.0;
     ];
 
 
-nQ = length(Q);     % Number of Control Points
-k = 3;              % Degree of B-Spline
-nKnot = nQ + k + 1; % Number of Knots in Knot Vector
-nSampling = 50;     % Number of Sampling / Control Points
-nt = nSampling * (nQ-1)+1;  % Number of Sampling
-ts = 1;        % Sampling time [s]
-Vmax = 1.1;        % max Velocity [m/s]
-Amax = 150;          % max Accelaration [mm/s^2]
-PosErrMax = 0.01;    % max Position Error [mm]
+n_CONTROL_POINT = length(Q);     % Number of Control Points
+DEGREE = 3;              % Degree of B-Spline
+n_KNOT = n_CONTROL_POINT + DEGREE + 1; % Number of Knots in Knot Vector
+n_SAMPLING_CONTROL = 50;     % Number of Sampling / Control Points
+n_SAMPLING = n_SAMPLING_CONTROL * (n_CONTROL_POINT-1)+1;  % Number of Sampling
+SAMPLING_TIME = 1;        % Sampling time [s]
+MAX_VELOCITY = 1.1;        % max Velocity [m/s]
+MAX_ACCEL = 150;          % max Accelaration [mm/s^2]
+MAX_POS_ERR = 0.01;    % max Position Error [mm]
 MotorRatio = 1;     % Ratio of Motor
 
-Mass = 5.33;
+MASS = 5.33;
 % Mass = 0;
-VelC = 24.2020;
-Fmax = 100;
+VEL_C = 24.2020;
+MAX_F = 100;
 
 
-t = 0:nt-1;
+t = 0:n_SAMPLING-1;
 t = t / t(end);
-% Vmax = Vmax /60;   %[mm/min] to [mm/s]
 
-u = OpenUniformKnotVector(nKnot,k,nQ);  %開一様ノットベクトル作成
-P = CalculateControlPoint(Q, u, k); % 制御点導出関数
+u = OpenUniformKnotVector(n_KNOT,DEGREE,n_CONTROL_POINT);
+P = CalculateControlPoint(Q, u, DEGREE);
 
 %%  Calculate B-spline Curve
 S = zeros(length(t),2);
 for i = 1:length(t)
-    for j =1:nQ
-        b = BasisFunction(u,j,k,t(i));
+    for j =1:n_CONTROL_POINT
+        b = BasisFunction(u,j,DEGREE,t(i));
         S(i,:) = S(i,:) + P(j,:)*b;
     end
 end
 
 S(1,:) = Q(1,:);
-SLength = TotalLength(Q);
+S_length = TotalLength(Q);
 
-% figure;
-% plot(S(:,1),S(:,2),P(:,1),P(:,2),'o',Q(:,1),Q(:,2),'o');
+figure;
+plot(S(:,1),S(:,2),Q(:,1),Q(:,2),'kx',P(:,1),P(:,2),'o');
+set(gca, 'FontSize', 12);
+xlabel('X (mm)');
+ylabel('Y (mm)');
+legend('B-Spline curve','Desired navigation points','Control Points');
+axis equal;
+axis([-5 15 -1 20]);
 
 %% 微分値を計算
-DS = zeros(nt,2); % 1列目：X軸，2列目：Y軸
-% DS_norm = zeros(nt, 1);
-DS_2 = zeros(nt,2); % 1列目：X軸，2列目：Y軸
-% DS_2_norm = zeros(nt, 1);
+DS = zeros(n_SAMPLING,2); % 1列目：X軸，2列目：Y軸
+DS_norm = zeros(n_SAMPLING, 1);
+DS_2 = zeros(n_SAMPLING,2); % 1列目：X軸，2列目：Y軸
+DS_2_norm = zeros(n_SAMPLING, 1);
 
-for i = 1: nt
-    for j =1:nQ
-        b = DifBasisFunction(1,u,j,k,t(i));  
+for i = 1: n_SAMPLING
+    for j =1:n_CONTROL_POINT
+        b = DifBasisFunction(1,u,j,DEGREE,t(i));  
         DS(i,:) = DS(i,:) + P(j,:)*b;
         DS_norm(i) = norm(DS(i,:));
-        b = DifBasisFunction(2,u,j,k,t(i));  
+        b = DifBasisFunction(2,u,j,DEGREE,t(i));  
         DS_2(i,:) = DS_2(i,:) + P(j,:)*b;
         DS_2_norm(i) = norm(DS_2(i,:));
     end
 end
 
+n_t = n_SAMPLING;
+
+% S(length(t):length(t) + 150,:) = S(1:151,:);
+% DS(length(t):length(t) + 150,:) = DS(1:151,:);
+% DS_2(length(t):length(t) + 150,:) = DS_2(1:151,:);
+% DS_norm(length(t):length(t) + 150,:) = DS_norm(1:151,:);
+% 
+% n_t = n_SAMPLING + 150;
+% 
+% t = 0:n_t-1;
+% t = t / t(end);
+
+figure;
+subplot(2,1,1);
+plot(t, DS(:,1),'b-',t, DS(:,2),'r--',t, DS_norm,'-.');
+xlabel('u');
+ylabel('V(mm/min)');
+legend('X-axis','Y-axis','Feed','norm(calculated)');
+set(gca, 'FontSize', 16);
+
+
+subplot(2,1,2); 
+plot(t, DS_2(:,1),'b-',t, DS_2(:,2),'r--');
+xlabel('u');
+ylabel('A(m/s^2)');
+legend('X-axis','Y-axis','Location','southeast');
+set(gca, 'FontSize', 16);
+% ylim([-120 120]);
+
+figure;
+plot(t,S);
+
 %% 曲率
-for i = 1: nt
-    for j =1:nQ
+for i = 1: n_t
+    for j =1:n_CONTROL_POINT
         MatDet = [DS(i, 1), DS(i, 2);
                   DS_2(i, 1), DS_2(i, 2)];
         R(i) = (DS(i,1)^2+DS(i,2)^2)^(3/2) / det(MatDet);
@@ -154,27 +200,26 @@ end
 
 %% 速度最適化
 DS_norm(1) = 1*10^(-10);
+DS_norm(1) = 1*10^(-10);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocityXYaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,nt,ts,MotorRatio,SLength);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocity(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,nt,ts,MotorRatio,SLength);
 % [V, fval, exitflag,output, cout,ceqout] = optimalVelocityCXY(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,nt,ts,MotorRatio,SLength);
-[V, fval, exitflag,output, cout,ceqout] = optimalEnergy(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
+[V, fval, exitflag,output, cout,ceqout] = optimalEnergy(t,DS,DS_2,DS_norm,R,MAX_VELOCITY,MAX_ACCEL,MAX_POS_ERR,MAX_F,MASS,VEL_C,n_t,SAMPLING_TIME,MotorRatio,S_length);
 % [V, fval, exitflag,output, cout,ceqout] = casadi_optimalVelocityXZaxis(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Fmax,Mass,VelC,nt,ts,MotorRatio,SLength);
 % [V, fval, exitflag,output, cout,ceqout] = casadi_optimalEnergy(t,DS,DS_2,DS_norm,R,Vmax,Amax,PosErrMax,Mass,Fmax,VelC,nt,ts,MotorRatio,SLength);
 
 
-% min(cout)
-
 %% 速度計算
-for i = 1: nt-1
+for i = 1: n_t-1
     V(i,2) = DS(i,1)*V(i)./DS_norm(i);
     V(i,3) = DS(i,2)*V(i)./DS_norm(i);
     V(i,4) = norm(V(i,2:3));
 end
 
 %% 加速度計算
-Accele = zeros(nt, 3);
-for i = 2: nt-1
+Accele = zeros(n_t, 3);
+for i = 2: n_t-1
 %     A(i, 1) = DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
 %     A(i, 2) = DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
     
@@ -191,18 +236,11 @@ end
 %% Plot result
 % plot(t);
 
-figure
-subplot(2,1,1);
-plot(t, V);
-xlabel('t');
-ylabel('V(m/s)');
-legend('norm(original)','X-axis','Y-axis','norm(calculated)');
-
-
 SRound = round(S,5).*(-1);
 Feed = V.*60;
 FeedRound = round(Feed,1);
 
+figure;
 subplot(2,1,1);
 plot(t, Feed(:,2),'b-',t, Feed(:,3),'r--',t, Feed(:,1),'-.');
 xlabel('u');
@@ -237,19 +275,16 @@ set(gca, 'FontSize', 16);
 % ylabel('d^2C/du^2');
 % legend('X','Y');
 
-% 
-% figure;
-% plot(S(:,1),S(:,2),Q(:,1),Q(:,2),'kx',P(:,1),P(:,2),'o');
-% set(gca, 'FontSize', 12);
-% xlabel('X (mm)');
-% ylabel('Y (mm)');
-% legend('B-Spline curve','Desired navigation points','Control Points');
-% axis equal;
-% axis([-5 15 -1 20]);
-% % 
-% 
-% NCCode = SRound;
-% NCCode(:,3) = FeedRound(:,1);
+
+figure;
+plot(S(:,1),S(:,2),Q(:,1),Q(:,2),'kx',P(:,1),P(:,2),'o');
+set(gca, 'FontSize', 12);
+xlabel('X (mm)');
+ylabel('Y (mm)');
+legend('B-Spline curve','Desired navigation points','Control Points');
+axis equal;
+axis([-5 15 -1 20]);
+
 %% インプットデータを作成
 % close all;
 
@@ -327,27 +362,27 @@ for i = 1:length(Const.Vel(:,1))
     Const.Vel(i,3) = norm(Const.Vel(i, 1:2));
 end
 
-figure;
-subplot(3,1,1);
-plot(t,Const.Vel(:,1),'b-',t,Const.Vel(:,2),'r--',t,Const.Vel(:,3));
-xlabel('t');
-ylabel('V(m/s)');
-legend('X-axis','Y-axis','Feed','norm(calculated)');
-set(gca, 'FontSize', 16);
-
-subplot(3,1,2); 
-plot(t,Const.Pos(:,1),'b-',t,Const.Pos(:,2),'r--');
-xlabel('t');
-ylabel('Pos(m)');
-legend('X-axis','Y-axis','Location','southeast');
-set(gca, 'FontSize', 16);
-
-subplot(3,1,3); 
-plot(Const.Pos(:,1),Const.Pos(:,2));
+% figure;
+% subplot(3,1,1);
+% plot(t,Const.Vel(:,1),'b-',t,Const.Vel(:,2),'r--',t,Const.Vel(:,3));
+% xlabel('t');
+% ylabel('V(m/s)');
+% legend('X-axis','Y-axis','Feed','norm(calculated)');
+% set(gca, 'FontSize', 16);
+% 
+% subplot(3,1,2); 
+% plot(t,Const.Pos(:,1),'b-',t,Const.Pos(:,2),'r--');
 % xlabel('t');
 % ylabel('Pos(m)');
 % legend('X-axis','Y-axis','Location','southeast');
-set(gca, 'FontSize', 16);
+% set(gca, 'FontSize', 16);
+% 
+% subplot(3,1,3); 
+% plot(Const.Pos(:,1),Const.Pos(:,2));
+% % xlabel('t');
+% % ylabel('Pos(m)');
+% % legend('X-axis','Y-axis','Location','southeast');
+% set(gca, 'FontSize', 16);
 
 
 Const.Pos(:,1) = Const.Pos(:,1) - 5;
@@ -478,22 +513,6 @@ inputVelocity = [t',realVelocity];
 save('inputdata','inputPosition','inputVelocity','t','inputConstPosition','inputConstVelocity');
 
 %%
-% figure;
-% subplot(2,1,1);
-% plot(Real.Vel(:,1),Real.Vel(:,2),'b-',Real.Vel(:,1),Real.Vel(:,3),'r--');
-% xlabel('t');
-% ylabel('V(m/s)');
-% legend('X-axis','Y-axis','Feed','norm(calculated)');
-% set(gca, 'FontSize', 16);
-% 
-% 
-% subplot(2,1,2); 
-% plot(Real.Pos(:,1),Real.Pos(:,2),'b-',Real.Pos(:,1),Real.Pos(:,3),'r--');
-% xlabel('t');
-% ylabel('Pos(m)');
-% legend('X-axis','Y-axis','Location','southeast');
-% set(gca, 'FontSize', 16);
-
 
 figure;
 subplot(3,1,1);
@@ -520,7 +539,6 @@ set(gca, 'FontSize', 16);
 %%
 clearvars b i Amax exitflag j k MatDet MotorRatio nKnot nQ nSampling nt output PosErrMax SLength ts u Vmax
 
-% close all
 return
  
 %%
