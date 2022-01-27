@@ -1,8 +1,12 @@
 close all
 %%
 dt = 0.01;
-t = 0:dt:5-dt;
+t = 0:dt:3-dt;
 simulateS = [S(:,1) - 5, S(:,2)];
+
+sgn_076(:,2) = -sgn_076(:,2);
+sgn_076(:,6) = -sgn_076(:,6);
+
 
 simulatePosition = zeros(length(realPosition(:,1)),2);
 simulateVelocity = zeros(length(realPosition(:,1)),2);
@@ -24,7 +28,7 @@ axis([-12 12 -1 11])
 s(2) = subplot(4,1,2); 
 plot(t,sgn_076(:,1),'b-',t,sgn_076(:,2),'r-',inputPosition(:,1),simulatePosition(:,1),'b--',inputPosition(:,1),simulatePosition(:,2),'r--');
 s(3) = subplot(4,1,3); 
-plot(t,sgn_076(:,5),'b-',t,sgn_076(:,6),'r-',inputPosition(:,1),simulateVelocity(:,1),'b--',inputPosition(:,1),simulateVelocity(:,2),'r--');
+plot(t,sgn_076(:,5),'b-',t,sgn_076(:,6),'r-',inputPosition(:,1),simulateVelocity(:,1),'b--',inputPosition(:,1),-simulateVelocity(:,2),'r--');
 s(4) = subplot(4,1,4); 
 plot(t,sgn_076(:,3),'b-',t,sgn_076(:,4),'r-');
 

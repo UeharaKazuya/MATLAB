@@ -30,7 +30,7 @@ for  i = 1:1
     x0(2,end-i+1) = 0;
 end
 
-options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','MaxFunctionEvaluations',100000000000, 'MaxIterations',10000000000);
+options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','MaxFunctionEvaluations',30000, 'MaxIterations',10000000000);
 %options = optimoptions('fmincon','Algorithm','interior-point','MaxFunctionEvaluations',100000000000);
 
 [V, fval, exitflag, output] = fmincon(ffun,x0,[],[],[],[],[],[],gfun,options);
@@ -47,7 +47,7 @@ options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','
 %             c(nt+i) =abs(DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1))) - Amax;
 %             c(i) = abs(DS_2(i,1)*(V(i)/SLength)^2 + DS(i,1)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i))) - (fmax - VelC*V(i))/Mass;
 %             c(nt+i) =abs(DS_2(i,2)*(V(i)/SLength)^2 + DS(i,2)*(V(i+1)^2-V(i)^2)/2*SLength^2*(t(i+1)-t(i))) - (fmax - VelC*V(i))/Mass;
-            c(nt+i)   = 16 - sum(V.^2); 
+            c(nt+i)   = 10 - sum(V.^2); 
             c(2*nt+i) = V(i) - MatMin(i,1);
             c(3*nt+i) = -V(i);
         end

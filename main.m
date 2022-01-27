@@ -93,20 +93,20 @@ nKnot = nQ + k + 1; % Number of Knots in Knot Vector
 nSampling = 50;     % Number of Sampling / Control Points
 nt = nSampling * (nQ-1)+1;  % Number of Sampling
 ts = 1;        % Sampling time [s]
-Vmax = 100;        % max Velocity [mm/min]
+Vmax = 1.1;        % max Velocity [m/s]
 Amax = 150;          % max Accelaration [mm/s^2]
 PosErrMax = 0.01;    % max Position Error [mm]
 MotorRatio = 1;     % Ratio of Motor
 
 Mass = 5.33;
-Mass = 0;
+% Mass = 0;
 VelC = 24.2020;
 Fmax = 100;
 
 
 t = 0:nt-1;
 t = t / t(end);
-Vmax = Vmax /60;   %[mm/min] to [mm/s]
+% Vmax = Vmax /60;   %[mm/min] to [mm/s]
 
 u = OpenUniformKnotVector(nKnot,k,nQ);  %開一様ノットベクトル作成
 P = CalculateControlPoint(Q, u, k); % 制御点導出関数
@@ -123,8 +123,8 @@ end
 S(1,:) = Q(1,:);
 SLength = TotalLength(Q);
 
-figure;
-plot(S(:,1),S(:,2),P(:,1),P(:,2),'o',Q(:,1),Q(:,2),'o');
+% figure;
+% plot(S(:,1),S(:,2),P(:,1),P(:,2),'o',Q(:,1),Q(:,2),'o');
 
 %% 微分値を計算
 DS = zeros(nt,2); % 1列目：X軸，2列目：Y軸
@@ -179,7 +179,7 @@ for i = 2: nt-1
 %     A(i, 2) = DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
     
     Accele(i, 3) = (V(i+1)^2-V(i)^2) / 2*DS_norm(i)*(t(i+1)-t(i));
-    Accele(i, 1) = DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*Accele(i, 3)/DS_norm(i);
+    Accele(i, 1) = -(DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*Accele(i, 3)/DS_norm(i));
     Accele(i, 2) = DS_2(i,2)*(V(i)/DS_norm(i))^2 + DS(i,2)*Accele(i, 3)/DS_norm(i);
     
     Accele2(i, 1) = DS_2(i,1)*(V(i)/DS_norm(i))^2 + DS(i,1)*((V(i+1)/DS_norm(i+1))^2-(V(i-1)/DS_norm(i-1))^2)/2*(t(i+1)-t(i-1));
@@ -307,43 +307,46 @@ for i = 1:length(t)
 end
 
 realPosition(:,1) = realPosition(:,1) - 5;
-for i = 1:97
+
+
+for i = 1:74
     realVelocity(i, 1:2) = [0, 0];
 end
-for i = 99:99
+for i = 75:76
     realVelocity(i, 1:2) = realVelocity(i+1, 1:2)./2;
 end
 % for i = 198:301
 %     realVelocity(i, 1:2) = [0, 0];
 % end
-for i = 1:97
+for i = 1:74
     realPosition(i, 1:2) = [0, 0];
 end
-for i = 298:length(t)
+for i = 275:length(t)
     realPosition(i, 1:2) = [0, 0];
 end
 
 inputPosition = [t',realPosition];
 inputVelocity = [t',realVelocity];
 
+
 save('inputdata','inputPosition','inputVelocity','t');
 
 %%
-figure;
-subplot(2,1,1);
-plot(Real.Vel(:,1),Real.Vel(:,2),'b-',Real.Vel(:,1),Real.Vel(:,3),'r--');
-xlabel('t');
-ylabel('V(m/s)');
-legend('X-axis','Y-axis','Feed','norm(calculated)');
-set(gca, 'FontSize', 16);
-
-
-subplot(2,1,2); 
-plot(Real.Pos(:,1),Real.Pos(:,2),'b-',Real.Pos(:,1),Real.Pos(:,3),'r--');
-xlabel('t');
-ylabel('Pos(m)');
-legend('X-axis','Y-axis','Location','southeast');
-set(gca, 'FontSize', 16);
+% figure;
+% subplot(2,1,1);
+% plot(Real.Vel(:,1),Real.Vel(:,2),'b-',Real.Vel(:,1),Real.Vel(:,3),'r--');
+% xlabel('t');
+% ylabel('V(m/s)');
+% legend('X-axis','Y-axis','Feed','norm(calculated)');
+% set(gca, 'FontSize', 16);
+% 
+% 
+% subplot(2,1,2); 
+% plot(Real.Pos(:,1),Real.Pos(:,2),'b-',Real.Pos(:,1),Real.Pos(:,3),'r--');
+% xlabel('t');
+% ylabel('Pos(m)');
+% legend('X-axis','Y-axis','Location','southeast');
+% set(gca, 'FontSize', 16);
 
 
 figure;
@@ -369,7 +372,7 @@ plot(realPosition(:,1),realPosition(:,2));
 set(gca, 'FontSize', 16);
 
 %%
-clearvars b i Amax exitflag fval j k MatDet MotorRatio nKnot nQ nSampling nt output PosErrMax SLength ts u Vmax
+clearvars b i Amax exitflag j k MatDet MotorRatio nKnot nQ nSampling nt output PosErrMax SLength ts u Vmax
 
 % close all
 return
