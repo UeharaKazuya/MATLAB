@@ -48,8 +48,8 @@ legend(s(4),'measured X-axis','measured Y-axis','simulation X-axis','simulation 
 
 text(s(1),-5, -3,'ツールパス');
 text(s(2),2, -9,'動作位置');
-text(s(3),2, -60,'動作速度');
-text(s(4),2, -8,'入力電圧');
+text(s(3),2, -,'動作速度');
+text(s(4),2, -2.5,'入力電圧');
 
 %% Constant
 dt = 0.01;
@@ -65,7 +65,7 @@ realVelocity = inputConstVelocity(:,2:3);
 simulatePosition = zeros(length(realPosition(:,1)),2);
 simulateVelocity = zeros(length(realVelocity(:,1)),2);
 
-GAP_INDEX = 60;
+GAP_INDEX = 52;
 for i=1:length(realPosition(:,1))-GAP_INDEX
     simulatePosition(i,:) = realPosition(i+GAP_INDEX,:);
 end

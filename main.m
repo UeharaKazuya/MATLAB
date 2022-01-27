@@ -253,20 +253,166 @@ set(gca, 'FontSize', 16);
 %% インプットデータを作成
 % close all;
 
+%% 一定速度を作成
+dt = 0.01;
+Const_timeEnd = 15;
+t = 0:dt:Const_timeEnd;
+START_INDEX = 74;
+END_INDEX   = 275;
+CONST_VELOCITY = 0.8;
+WIDTH_INDEX = 20;
+
+Const.Pos = zeros(length(t), 2);
+Const.Vel = zeros(length(t), 3);
+Const.NormVel = zeros(length(V(:,1)),3);
+
+Const.NormVel(:, 3) = CONST_VELOCITY;
+
+Const.Vel(1:START_INDEX, 3) = 0;
+Const.Vel(100:250, 3) = CONST_VELOCITY;
+
+for i = 1:WIDTH_INDEX
+    Const.NormVel(i, 3) = CONST_VELOCITY * (1 - cos((i-1) * pi/(WIDTH_INDEX-1)))/2;
+end
+
+for i = 1:WIDTH_INDEX
+    Const.NormVel(i+length(V(:,1))-WIDTH_INDEX, 3) = CONST_VELOCITY * (1 + cos((i-1) * pi/(WIDTH_INDEX-1)))/2;
+end
+
+j = 3;
+JUDGE_AXIS = 2;
+
+for i = 1:length(t)
+    if j > length(Const.NormVel(:,1))-1
+        Const.Pos(i,:) = S(1,:);
+        Const.Vel(i,:) = 0;
+        
+    else
+        orientation = (S(j+1,:) - S(j,:))./norm(S(j+1,:) - S(j,:));
+        Const.NormVel(j,1:2) = orientation * Const.NormVel(j,3);
+
+        if i == 1
+            Const.Pos(1,:) = S(1,:);
+            Const.Vel(1,1:2) = [0, 0];
+        elseif Const.NormVel(j,JUDGE_AXIS) < 0
+            Const.Pos(i,:) = Const.Pos(i-1,:) + Const.NormVel(j,1:2).*dt;
+            Const.Vel(i,1:2) = Const.NormVel(j,1:2);
+            
+            if Const.Pos(i,JUDGE_AXIS) < S(j,JUDGE_AXIS)
+                if j < length(Const.Vel(:,1))
+                    j = j+1;
+                end
+                Const.Pos(i,:) = S(j,:);
+            end
+
+        elseif Const.NormVel(j,JUDGE_AXIS) > 0
+            Const.Pos(i,:) = Const.Pos(i-1,:) + Const.NormVel(j,1:2).*dt;
+            Const.Vel(i,1:2) = Const.NormVel(j,1:2);
+
+            if Const.Pos(i,JUDGE_AXIS) > S(j,JUDGE_AXIS)
+                if j < length(Const.Vel(:,1))
+                    j = j+1;
+                end
+                Const.Pos(i,:) = S(j,:);
+            end
+        elseif Const.NormVel(j,JUDGE_AXIS) == 0
+            if j < length(Const.Vel(:,1))
+                j = j+1;
+            end            
+        end        
+    end
+end
+
+for i = 1:length(Const.Vel(:,1))
+    Const.Vel(i,3) = norm(Const.Vel(i, 1:2));
+end
+
+figure;
+subplot(3,1,1);
+plot(t,Const.Vel(:,1),'b-',t,Const.Vel(:,2),'r--',t,Const.Vel(:,3));
+xlabel('t');
+ylabel('V(m/s)');
+legend('X-axis','Y-axis','Feed','norm(calculated)');
+set(gca, 'FontSize', 16);
+
+subplot(3,1,2); 
+plot(t,Const.Pos(:,1),'b-',t,Const.Pos(:,2),'r--');
+xlabel('t');
+ylabel('Pos(m)');
+legend('X-axis','Y-axis','Location','southeast');
+set(gca, 'FontSize', 16);
+
+subplot(3,1,3); 
+plot(Const.Pos(:,1),Const.Pos(:,2));
+% xlabel('t');
+% ylabel('Pos(m)');
+% legend('X-axis','Y-axis','Location','southeast');
+set(gca, 'FontSize', 16);
+
+
+Const.Pos(:,1) = Const.Pos(:,1) - 5;
+
+dt = 0.01;
+Const_timeEnd = 3;
+t = 0:dt:Const_timeEnd;
+
+inputConstPosition = [t(:,1:283)', Const.Pos(924-75:1131,:)];
+inputConstVelocity = [t(:,1:283)', Const.Vel(924-75:1131,1:2)];
+
+
+for i = 1:START_INDEX
+    inputConstVelocity(i, 2:3) = [0, 0];
+end
+for i = START_INDEX+1 : START_INDEX+2
+    inputConstVelocity(i, 2:3) = inputConstVelocity(i+1, 2:3)./2;
+end
+
+
+for i = 1:START_INDEX+1
+    inputConstPosition(i, 2:3) = [0, 0];
+end
+for i = END_INDEX : length(t)
+    inputConstPosition(i, 2:3) = [0, 0];
+end
+
+for i = END_INDEX : length(t)
+    inputConstVelocity(i, 2:3) = [0, 0];
+end
+
+inputConstPosition(:,1) = t';
+inputConstVelocity(:,1) = t';
+
+
+figure;
+subplot(3,1,1);
+plot(t,inputConstVelocity(:,2),'b-',t, inputConstVelocity(:,3),'r--');
+xlabel('t');
+ylabel('V(m/s)');
+legend('X-axis','Y-axis','Feed','norm(calculated)');
+set(gca, 'FontSize', 16);
+
+subplot(3,1,2); 
+plot(t,inputConstPosition(:,2),'b-',t,inputConstPosition(:,3),'r--');
+xlabel('t');
+ylabel('Pos(m)');
+legend('X-axis','Y-axis','Location','southeast');
+set(gca, 'FontSize', 16);
+
+subplot(3,1,3); 
+plot(Const.Pos(:,1),Const.Pos(:,2));
+% xlabel('t');
+% ylabel('Pos(m)');
+% legend('X-axis','Y-axis','Location','southeast');
+set(gca, 'FontSize', 16);
+
+
+%% 最適化
+
 T_data = t*15;
 dt = 0.01;
-tEnd = 4;
-
-Real.Vel = Calc_RealTime_Linear(T_data,dt,V(:,2),V(:,3));
-Real.Pos = Calc_RealTime_Linear(T_data,dt,S(:,1),S(:,2));
-Real.PosX = [Real.Pos(:,1),Real.Pos(:,2)];
-Real.PosY = [Real.Pos(:,1),Real.Pos(:,3)];
-% S_len = TotalLength(sol.value(S));
-% ActualTime = S_len/mean(feed);
-
-%%
-t = 0:dt:tEnd;
+t = 0:dt:Const_timeEnd;
 j = 2;
+
 realPosition = zeros(length(t),2);
 realVelocity = zeros(length(t),2);
 
@@ -329,7 +475,7 @@ inputPosition = [t',realPosition];
 inputVelocity = [t',realVelocity];
 
 
-save('inputdata','inputPosition','inputVelocity','t');
+save('inputdata','inputPosition','inputVelocity','t','inputConstPosition','inputConstVelocity');
 
 %%
 % figure;
