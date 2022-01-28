@@ -1,6 +1,6 @@
 %% main関数　速度最適化を行い，B-Spline曲線を表示する．
 clear
-close all
+% close all
 
 %% desired Points (X-Y)
 % Q = [ 
@@ -84,14 +84,17 @@ Q = [
     10.0, 5.0;
     5.0, 10.0;
     0.0, 5.0;
+    
     5.0, 0.0;
     10.0, 5.0;
     5.0, 10.0;
     0.0, 5.0;
+    
     5.0, 0.0;
     10.0, 5.0;
     5.0, 10.0;
     0.0, 5.0;
+    
     5.0, 0.0;
     ];
 
@@ -276,17 +279,8 @@ set(gca, 'FontSize', 16);
 % legend('X','Y');
 
 
-figure;
-plot(S(:,1),S(:,2),Q(:,1),Q(:,2),'kx',P(:,1),P(:,2),'o');
-set(gca, 'FontSize', 12);
-xlabel('X (mm)');
-ylabel('Y (mm)');
-legend('B-Spline curve','Desired navigation points','Control Points');
-axis equal;
-axis([-5 15 -1 20]);
-
 %% インプットデータを作成
-% close all;
+
 
 %% 一定速度を作成
 dt = 0.01;
