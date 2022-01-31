@@ -7,10 +7,10 @@ inputVelocity = zeros(length(t),3);
 inputPosition(:,1) = t;
 inputVelocity(:,1) = t;
 
-inputPosition(1+DATA.STANDBY_INDEX:DATA.MULT_START_INDEX - DATA.START_INDEX + DATA.STANDBY_INDEX,2:3) ...
-    = Const.Pos(DATA.START_INDEX-DATA.STANDBY_INDEX+1:DATA.MULT_START_INDEX,1:2);
-inputVelocity(1+DATA.STANDBY_INDEX:DATA.MULT_START_INDEX - DATA.START_INDEX + DATA.STANDBY_INDEX,2:3) ...
-    = Const.Vel(DATA.START_INDEX-DATA.STANDBY_INDEX+1:DATA.MULT_START_INDEX,1:2);
+inputPosition(1:DATA.MULT_START_INDEX - DATA.START_INDEX,2:3) ...
+    = Const.Pos(DATA.START_INDEX:DATA.MULT_START_INDEX-1,1:2);
+inputVelocity(1:DATA.MULT_START_INDEX - DATA.START_INDEX,2:3) ...
+    = Const.Vel(DATA.START_INDEX:DATA.MULT_START_INDEX-1,1:2);
 
 for i = 0:n_MULTIPLE-1
     inputPosition((i*WIDTH_INDEX)+1 + DATA.MULT_START_INDEX - DATA.START_INDEX + DATA.STANDBY_INDEX : (i*WIDTH_INDEX) + WIDTH_INDEX + DATA.MULT_START_INDEX - DATA.START_INDEX + DATA.STANDBY_INDEX, 2:3) ...
@@ -32,7 +32,7 @@ outputInputVelocity = zeros(length(t),3);
 outputInputPosition(:,1) = t;
 outputInputVelocity(:,1) = t;
 
-outputInputPosition(DATA.STANDBY_LENGTH+1:length(t),2:3) = inputPosition(1:length(t)-DATA.STANDBY_LENGTH,2:3);
-outputInputVelocity(DATA.STANDBY_LENGTH+1:length(t),2:3) = inputVelocity(1:length(t)-DATA.STANDBY_LENGTH,2:3);
+outputInputPosition(DATA.STANDBY_INDEX+1:length(t),2:3) = inputPosition(1:length(t)-DATA.STANDBY_INDEX,2:3);
+outputInputVelocity(DATA.STANDBY_INDEX+1:length(t),2:3) = inputVelocity(1:length(t)-DATA.STANDBY_INDEX,2:3);
 end
 
