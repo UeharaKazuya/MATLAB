@@ -1,7 +1,7 @@
 % close all
 %%
 dt = 0.01;
-t = 0:dt:125;
+t = 0:dt:25;
 simulateS = [S(:,1) , S(:,2)];
 
 sgn_076(:,2) = sgn_076(:,2);
@@ -21,11 +21,7 @@ for i=1:length(realPosition(:,1))-GAP_INDEX
     simulateVelocity(i,:) = realVelocity(i+GAP_INDEX,:).*[1, -1];
 end
 
-simulateS(:,1) = simulateS(:,1) - 5;
-
-sum(sgn_076(:,3))
-sum(sgn_076(:,4))
-
+simulatePosition(:,1) = simulatePosition(:,1) + 5;
 
 ex1 = figure;
 s(1) = subplot(4,1,1); 
@@ -80,7 +76,7 @@ for i=1:length(realPosition(:,1))-GAP_INDEX
     simulateVelocity(i,:) = realVelocity(i+GAP_INDEX,:).*[1, -1];
 end
 
-simulateS(:,1) = simulateS(:,1) - 5;
+simulatePosition(:,1) = simulatePosition(:,1) + 5;
 
 ex2 = figure;
 s(1) = subplot(4,1,1); 
